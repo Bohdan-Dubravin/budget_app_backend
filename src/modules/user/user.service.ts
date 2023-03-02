@@ -1,12 +1,13 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+
 import * as argon from 'argon2';
+import { PrismaService } from 'src/database/Prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: PrismaService) {}
 
   async createUser(dto: CreateUserDto) {
     const isExist = await this.prisma.user.findUnique({
@@ -22,6 +23,9 @@ export class UserService {
     const user = await this.prisma.user.create({
       data: { ...dto, password: hash },
     });
+
+    delete user.password;
+    return { ...user };
   }
 
   async updateUser(userId: string, dto: UpdateUserDto) {
