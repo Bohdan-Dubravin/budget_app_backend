@@ -3,42 +3,13 @@ import { PrismaClient } from '@prisma/client';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import * as argon from 'argon2';
 import { UpdateUserDto } from '../user/dto/update-user.dto';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: PrismaClient, private userService: UserService) {}
 
-  async createUser(dto: CreateUserDto) {
-    const isExist = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
+  async register(dto: CreateUserDto) {}
 
-    if (isExist) {
-      throw new ForbiddenException('Email already taken');
-    }
-
-    const hash = await argon.hash(dto.password);
-
-    const user = await this.prisma.user.create({
-      data: { ...dto, password: hash },
-    });
-  }
-
-  async updateUser(userId: string, dto: UpdateUserDto) {
-    const isExist = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (isExist) {
-      throw new ForbiddenException('Email already taken');
-    }
-
-    const user = await this.prisma.user.update({
-      where: { id: userId },
-      data: { ...dto },
-    });
-
-    delete user.password;
-    return user;
-  }
+  async login() {}
 }
