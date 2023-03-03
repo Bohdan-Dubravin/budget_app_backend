@@ -8,11 +8,22 @@ export class TransactionService {
   constructor(private prisma: PrismaService) {}
 
   async getAllUserTransactions(userId: string) {
-    const transaction = await this.prisma.transaction.findMany({
+    const transactions = await this.prisma.transaction.findMany({
       where: { userId },
+      select: {
+        amount: true,
+      },
     });
 
-    return transaction;
+    return transactions;
+  }
+
+  async getTransactionsByCategory(userId: string, categoryId: string) {
+    const transactions = await this.prisma.transaction.findMany({
+      where: { userId, categoryId },
+    });
+
+    return transactions;
   }
 
   async getTransactionById(transactionId: string) {
@@ -56,8 +67,8 @@ export class TransactionService {
   }
 
   async deleteTransaction(userId: string, transactionId: string) {
-    const transaction = await this.prisma.transaction.delete({
-      where: { id: transactionId },
+    const transaction = await this.prisma.transaction.deleteMany({
+      where: { id: transactionId, userId },
     });
 
     return transaction;

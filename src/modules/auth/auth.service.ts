@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotAcceptableException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { UserService } from '../user/user.service';
 import { Tokens } from 'src/types';
@@ -24,7 +20,7 @@ export class AuthService {
 
     const tokens = await this.signTokens(user.id, user.email);
 
-    await this.updateRefreshTokenInDb(user.id, tokens.refreshToken);
+    await this.updateTokenInDb(user.id, tokens.refreshToken);
     return tokens;
   }
 
@@ -45,7 +41,7 @@ export class AuthService {
 
     const tokens = await this.signTokens(existUser.id, existUser.email);
 
-    await this.updateRefreshTokenInDb(existUser.id, tokens.refreshToken);
+    await this.updateTokenInDb(existUser.id, tokens.refreshToken);
 
     return tokens;
   }
@@ -53,7 +49,7 @@ export class AuthService {
   async logout(userId: string) {
     await this.prisma.user.updateMany({
       where: {
-        id: '60f11350-df47-4f18-8c81-aeb5095de36a',
+        id: userId,
         refreshToken: { not: null },
       },
       data: { refreshToken: null },
@@ -61,7 +57,24 @@ export class AuthService {
     return;
   }
 
-  async refreshTokens() {}
+  async refreshTokens(userId: string, refreshToken: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
+    if (!user) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    const tokenMatches = await argon.verify(user.refreshToken, refreshToken);
+
+    if (!tokenMatches) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    const newTokens = await this.signTokens(user.id, user.email);
+    await this.updateTokenInDb(user.id, newTokens.refreshToken);
+
+    return newTokens;
+  }
 
   async signTokens(userId: string, email: string): Promise<Tokens> {
     const accessToken = this.jwtService.signAsync(
@@ -71,13 +84,13 @@ export class AuthService {
 
     const refreshToken = this.jwtService.signAsync(
       { sub: userId, email },
-      { expiresIn: '30d', secret: "'efefewww'" },
+      { expiresIn: 60 * 60 * 24 * 30, secret: 'refresh' },
     );
     const [at, rt] = await Promise.all([accessToken, refreshToken]);
     return { accessToken: at, refreshToken: rt };
   }
 
-  async updateRefreshTokenInDb(userId: string, refreshToken: string) {
+  async updateTokenInDb(userId: string, refreshToken: string) {
     const hash = await argon.hash(refreshToken);
 
     await this.prisma.user.update({
