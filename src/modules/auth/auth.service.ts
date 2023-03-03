@@ -9,6 +9,7 @@ import { Tokens } from 'src/types';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/database/Prisma.service';
 import * as argon from 'argon2';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -20,12 +21,47 @@ export class AuthService {
 
   async register(dto: CreateUserDto): Promise<Tokens> {
     const user = await this.userService.createUser(dto);
+
     const tokens = await this.signTokens(user.id, user.email);
+
     await this.updateRefreshTokenInDb(user.id, tokens.refreshToken);
     return tokens;
   }
 
-  async login() {}
+  async login(dto: LoginDto): Promise<Tokens> {
+    const existUser = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (!existUser) {
+      throw new ForbiddenException('Email or password is wrong');
+    }
+
+    const passwordMatch = await argon.verify(existUser.password, dto.password);
+
+    if (!passwordMatch) {
+      throw new ForbiddenException('Email or password is wrong');
+    }
+
+    const tokens = await this.signTokens(existUser.id, existUser.email);
+
+    await this.updateRefreshTokenInDb(existUser.id, tokens.refreshToken);
+
+    return tokens;
+  }
+
+  async logout(userId: string) {
+    await this.prisma.user.updateMany({
+      where: {
+        id: '60f11350-df47-4f18-8c81-aeb5095de36a',
+        refreshToken: { not: null },
+      },
+      data: { refreshToken: null },
+    });
+    return;
+  }
+
+  async refreshTokens() {}
 
   async signTokens(userId: string, email: string): Promise<Tokens> {
     const accessToken = this.jwtService.signAsync(

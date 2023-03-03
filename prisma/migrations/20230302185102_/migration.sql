@@ -6,7 +6,9 @@ CREATE TABLE "User" (
     "displayedName" TEXT,
     "avatarUrl" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "TotalMounthBudget" DOUBLE PRECISION,
+    "TotalMonthBudget" DOUBLE PRECISION,
+    "currencyFormat" TEXT,
+    "refreshToken" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -24,7 +26,6 @@ CREATE TABLE "Category" (
 -- CreateTable
 CREATE TABLE "Transaction" (
     "id" TEXT NOT NULL,
-    "title" TEXT NOT NULL,
     "amount" DOUBLE PRECISION NOT NULL,
     "description" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
