@@ -79,7 +79,7 @@ export class AuthService {
   async signTokens(userId: string, email: string): Promise<Tokens> {
     const accessToken = this.jwtService.signAsync(
       { sub: userId, email },
-      { expiresIn: '15m', secret: 'dsffdfww' },
+      { expiresIn: '60m', secret: 'dsffdfww' },
     );
 
     const refreshToken = this.jwtService.signAsync(

@@ -18,6 +18,23 @@ export class TransactionService {
     return transactions;
   }
 
+  async getAllTransactionsByDate(userId: string, start: string, end: string) {
+    const transactions = await this.prisma.transaction.findMany({
+      where: {
+        userId,
+        createdAt: {
+          lte: end,
+          gte: start,
+        },
+      },
+      select: {
+        amount: true,
+      },
+    });
+
+    return transactions;
+  }
+
   async getTransactionsByCategory(userId: string, categoryId: string) {
     const transactions = await this.prisma.transaction.findMany({
       where: { userId, categoryId },
@@ -43,7 +60,7 @@ export class TransactionService {
       data: {
         ...dto,
         userId,
-        categoryId,
+        categoryId: '133210fb-9db8-4b26-b577-5804b2da5b9b',
       },
     });
 
