@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/database/Prisma.service';
+import { PrismaService } from '../../database/Prisma.service';
 import { NewCategoryDto } from './dto/new-category.dto';
 
 @Injectable()
@@ -7,7 +7,9 @@ export class CategoryService {
   constructor(private prisma: PrismaService) {}
 
   async createCategory(userId: string, dto: NewCategoryDto) {
-    const category = this.prisma.category.create({ data: { ...dto, userId } });
+    const category = await this.prisma.category.create({
+      data: { ...dto, userId },
+    });
 
     return category;
   }
@@ -17,7 +19,7 @@ export class CategoryService {
     userId: string,
     dto: NewCategoryDto,
   ) {
-    const category = this.prisma.category.updateMany({
+    const category = await this.prisma.category.updateMany({
       where: { id: categoryId, userId },
       data: { ...dto },
     });
@@ -26,13 +28,13 @@ export class CategoryService {
   }
 
   async getAllCategories(userId: string) {
-    const transactions = await this.prisma.transaction.findMany({
+    const categories = await this.prisma.category.findMany({
       where: { userId },
-      select: {
-        amount: true,
-      },
+      // select: {
+      //   amount: true,
+      // },
     });
 
-    return transactions;
+    return categories;
   }
 }

@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 
 import * as argon from 'argon2';
-import { PrismaService } from 'src/database/Prisma.service';
+import { PrismaService } from '../../database/Prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 

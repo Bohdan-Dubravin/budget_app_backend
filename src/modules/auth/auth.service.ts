@@ -3,7 +3,7 @@ import { CreateUserDto } from '../user/dto/create-user.dto';
 import { UserService } from '../user/user.service';
 import { Tokens } from 'src/types';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'src/database/Prisma.service';
+import { PrismaService } from '../../database/Prisma.service';
 import * as argon from 'argon2';
 import { LoginDto } from './dto/login.dto';
 

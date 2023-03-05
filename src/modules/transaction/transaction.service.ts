@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-
-import { PrismaService } from 'src/database/Prisma.service';
+import { PrismaService } from '../../database/Prisma.service';
 import { NewTransactionDto } from './dto/new-transaction.dto';
 
 @Injectable()
@@ -10,9 +9,6 @@ export class TransactionService {
   async getAllUserTransactions(userId: string) {
     const transactions = await this.prisma.transaction.findMany({
       where: { userId },
-      select: {
-        amount: true,
-      },
     });
 
     return transactions;
@@ -60,7 +56,7 @@ export class TransactionService {
       data: {
         ...dto,
         userId,
-        categoryId: '133210fb-9db8-4b26-b577-5804b2da5b9b',
+        categoryId,
       },
     });
 

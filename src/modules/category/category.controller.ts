@@ -8,9 +8,10 @@ import { GetCurrentUser } from '../auth/decorators';
 export class CategoryController {
   constructor(private categoryService: CategoryService) {}
 
+  @UseGuards(AtGuard)
   @Get()
-  getAllCategories() {
-    return { name: 'get' };
+  getAllCategories(@GetCurrentUser('userId') userId: string) {
+    return this.categoryService.getAllCategories(userId);
   }
 
   @UseGuards(AtGuard)

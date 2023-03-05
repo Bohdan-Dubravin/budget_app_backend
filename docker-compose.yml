@@ -11,6 +11,20 @@ services:
   #   volumes:
   #     - postgres:/var/lib/postgresql/data
 
+  # test-postgres:
+  #   image: postgres
+  #   container_name: postgres
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_DB: test_budget_prisma
+  #   ports:
+  #     - 6505:5432
+  #   env_file:
+  #     - ./.env
+  #   volumes:
+  #     - postgres:/var/lib/postgresql/data
+
   test-postgres:
     image: postgres
     container_name: postgres
@@ -19,7 +33,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: test_budget_prisma
     ports:
-      - 6505:5432
+      - 6508:5432
     env_file:
       - ./.env
     volumes:
