@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
@@ -13,6 +14,7 @@ import { LoginDto } from './dto/login.dto';
 import { AtGuard, RtGuard } from './guards';
 import { GetCurrentUser } from './decorators';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { CredentialsForAuth } from './entities/credential.entiti';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -20,28 +22,36 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @ApiOperation({ summary: 'Register new user' })
-  @ApiResponse({ status: 201 })
+  @ApiResponse({ status: 201, type: [CredentialsForAuth] })
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   register(@Body() dto: CreateUserDto): Promise<Tokens> {
     return this.authService.register(dto);
   }
 
+  @ApiOperation({ summary: 'Login with email & password' })
+  @ApiResponse({ status: 201, type: [CredentialsForAuth] })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   login(@Body() dto: LoginDto): Promise<Tokens> {
     return this.authService.login(dto);
   }
 
+  @ApiOperation({ summary: 'Logout from device' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 200 })
   @UseGuards(AtGuard)
-  @Post('logout')
+  @Get('logout')
   @HttpCode(HttpStatus.OK)
   logout(@GetCurrentUser('sub') userId: string) {
     return this.authService.logout(userId);
   }
 
+  @ApiOperation({ summary: 'Get new pair access and refresh tokens' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 200 })
   @UseGuards(RtGuard)
-  @Post('refresh')
+  @Get('refresh')
   @HttpCode(HttpStatus.OK)
   refreshTokens(
     @GetCurrentUser('refreshToken') refreshToken: string,
