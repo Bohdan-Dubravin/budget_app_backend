@@ -3,7 +3,9 @@ import { GetCurrentUser } from '../auth/decorators';
 import { AtGuard } from '../auth/guards';
 import { TransactionService } from './transaction.service';
 import { NewTransactionDto } from './dto/new-transaction.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Transaction')
 @Controller('transaction')
 export class TransactionController {
   constructor(private transactionService: TransactionService) {}

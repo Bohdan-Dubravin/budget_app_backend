@@ -12,11 +12,15 @@ import { Tokens } from 'src/types';
 import { LoginDto } from './dto/login.dto';
 import { AtGuard, RtGuard } from './guards';
 import { GetCurrentUser } from './decorators';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @ApiOperation({ summary: 'Register new user' })
+  @ApiResponse({ status: 201 })
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   register(@Body() dto: CreateUserDto): Promise<Tokens> {

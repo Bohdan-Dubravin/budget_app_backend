@@ -3,7 +3,9 @@ import { NewCategoryDto } from './dto/new-category.dto';
 import { CategoryService } from './category.service';
 import { AtGuard } from '../auth/guards';
 import { GetCurrentUser } from '../auth/decorators';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Category')
 @Controller('category')
 export class CategoryController {
   constructor(private categoryService: CategoryService) {}

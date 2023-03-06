@@ -1,10 +1,11 @@
 import { Controller, Post } from '@nestjs/common';
 import { UserService } from './user.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('User')
 @Controller('user')
 export class UserController {
-
-  constructor (private userService: UserService){}
+  constructor(private userService: UserService) {}
 
   @Post()
   createUser() {}
