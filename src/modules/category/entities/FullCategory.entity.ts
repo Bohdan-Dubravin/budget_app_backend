@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { TransactionEntity } from 'src/modules/transaction/entities/transaction.entity';
+import { TransactionEntity } from '../../transaction/entities/transaction.entity';
 import { CategoryEntity } from './category.entity';
 
 export class FullCategoryEntity extends CategoryEntity {

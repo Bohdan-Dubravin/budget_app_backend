@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transaction } from '@prisma/client';
-import { TransactionEntity } from 'src/modules/transaction/entities/transaction.entity';
+import { TransactionEntity } from '../../transaction/entities/transaction.entity';
 
 export class CategoryEntity {
   @ApiProperty()

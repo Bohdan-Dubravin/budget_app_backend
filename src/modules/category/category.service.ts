@@ -39,7 +39,28 @@ export class CategoryService {
   async getAllCategories(userId: string) {
     const categories = await this.prisma.category.findMany({
       where: { userId },
-      include: { transactions: { select: { amount: true, createdAt: true } } },
+      include: {
+        transactions: { select: { amount: true, createdAt: true } },
+      },
+    });
+
+    return categories;
+  }
+
+  async getAllCategoriesByDate(userId: string, start: string, end: string) {
+    const categories = await this.prisma.category.findMany({
+      where: { userId },
+      include: {
+        transactions: {
+          where: {
+            createdAt: {
+              lte: end + 'T23:59:59.999Z',
+              gte: start + 'T00:00:00.000Z',
+            },
+          },
+          select: { amount: true },
+        },
+      },
     });
 
     return categories;

@@ -46,29 +46,44 @@ export class AuthService {
     return tokens;
   }
 
-  async logout(userId: string) {
-    await this.prisma.user.updateMany({
+  async logout(userId: string, refreshToken: string) {
+    await this.prisma.refreshToken.deleteMany({
       where: {
         id: userId,
-        refreshToken: { not: null },
+        refreshToken,
       },
-      data: { refreshToken: null },
+    });
+    return;
+  }
+
+  async logoutFromAllDevices(userId: string) {
+    await this.prisma.refreshToken.deleteMany({
+      where: {
+        userId,
+      },
     });
     return;
   }
 
   async refreshTokens(userId: string, refreshToken: string) {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { refreshTokens: true },
+    });
 
     if (!user) {
       throw new ForbiddenException('Access denied');
     }
-
-    const tokenMatches = await argon.verify(user.refreshToken, refreshToken);
+    const tokenMatches = user.refreshTokens.some((token) => {
+      return token.refreshToken === refreshToken;
+    });
 
     if (!tokenMatches) {
       throw new ForbiddenException('Access denied');
     }
+    await this.prisma.refreshToken.deleteMany({
+      where: { refreshToken },
+    });
 
     const newTokens = await this.signTokens(user.id, user.email);
     await this.updateTokenInDb(user.id, newTokens.refreshToken);
@@ -79,23 +94,28 @@ export class AuthService {
   async signTokens(userId: string, email: string): Promise<Tokens> {
     const accessToken = this.jwtService.signAsync(
       { sub: userId, email },
-      { expiresIn: '60m', secret: 'dsffdfww' },
+      { expiresIn: '15m', secret: 'dsffdfww' },
     );
 
     const refreshToken = this.jwtService.signAsync(
       { sub: userId, email },
-      { expiresIn: 60 * 60 * 24 * 30, secret: 'refresh' },
+      { expiresIn: '30d', secret: 'refresh' },
     );
     const [at, rt] = await Promise.all([accessToken, refreshToken]);
     return { accessToken: at, refreshToken: rt };
   }
 
   async updateTokenInDb(userId: string, refreshToken: string) {
-    const hash = await argon.hash(refreshToken);
+    await this.prisma.refreshToken.create({
+      data: { refreshToken, userId },
+    });
 
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { refreshToken: hash },
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    // await this.prisma.refreshToken.deleteMany({
+    //   where:  { createdAt: { lt: thirtyDaysAgo } },
+    // });
+    await this.prisma.refreshToken.deleteMany({
+      where: { OR: [{ createdAt: { lt: thirtyDaysAgo }, refreshToken }] },
     });
   }
 }

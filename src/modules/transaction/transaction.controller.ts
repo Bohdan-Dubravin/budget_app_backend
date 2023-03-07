@@ -6,6 +6,10 @@ import {
   Body,
   Param,
   Query,
+  Patch,
+  Delete,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { GetCurrentUser } from '../auth/decorators';
 import { AtGuard } from '../auth/guards';
@@ -13,6 +17,7 @@ import { TransactionService } from './transaction.service';
 import { NewTransactionDto } from './dto/new-transaction.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { TransactionEntity } from './entities/transaction.entity';
+import { UpdateTransactionDto } from './dto/update-transaction.dto';
 
 @ApiTags('Transaction')
 @Controller('transaction')
@@ -31,7 +36,7 @@ export class TransactionController {
     return this.transactionService.createTransaction(userId, categoryId, dto);
   }
 
-  @ApiOperation({ summary: 'Add new transaction' })
+  @ApiOperation({ summary: 'Get all transactions' })
   @ApiResponse({ status: 201, type: [TransactionEntity] })
   @UseGuards(AtGuard)
   @Get('getall')
@@ -39,29 +44,26 @@ export class TransactionController {
     return this.transactionService.getAllUserTransactions(userId);
   }
 
-  @ApiOperation({
-    summary: 'Get all transaction between start and end period',
-  })
-  @ApiQuery({
-    name: 'start',
-    example: '05-12-2022',
-    required: true,
-    type: String,
-  })
-  @ApiQuery({
-    name: 'end',
-    example: '05-01-2023',
-    required: true,
-    type: String,
-  })
-  @ApiResponse({ status: 201, type: [TransactionEntity] })
+  @ApiOperation({ summary: 'Update transaction by Id' })
+  @ApiResponse({ status: 201, type: TransactionEntity })
   @UseGuards(AtGuard)
-  @Get('period')
-  getAllTransactionByDate(
-    @GetCurrentUser('userId') userId: string,
-    @Query('start') start: string,
-    @Query('end') end: string,
+  @Patch(':transactionId')
+  updateTransaction(
+    @Body() dto: UpdateTransactionDto,
+    @Param('transactionId') transactionId: string,
   ) {
-    return this.transactionService.getAllTransactionsByDate(userId, start, end);
+    return this.transactionService.updateTransaction(transactionId, dto);
+  }
+
+  @ApiOperation({ summary: 'Delete transaction by Id' })
+  @ApiResponse({ status: 204 })
+  @UseGuards(AtGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':transactionId')
+  deleteTransaction(
+    @GetCurrentUser('userId') userId: string,
+    @Param('transactionId') transactionId: string,
+  ) {
+    return this.transactionService.deleteTransaction(userId, transactionId);
   }
 }

@@ -8,13 +8,14 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { NewCategoryDto } from './dto/new-category.dto';
 import { CategoryService } from './category.service';
 import { AtGuard } from '../auth/guards';
 import { GetCurrentUser } from '../auth/decorators';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { CategoryEntity } from './entities/category.entity';
 import { EditCategoryDto } from './dto/edit-category.dto copy';
 import { FullCategoryEntity } from './entities/FullCategory.entity';
@@ -24,12 +25,38 @@ import { FullCategoryEntity } from './entities/FullCategory.entity';
 export class CategoryController {
   constructor(private categoryService: CategoryService) {}
 
-  @ApiOperation({ summary: 'Get all user categories' })
+  @ApiOperation({ summary: 'Get all user categories with expends' })
   @ApiResponse({ status: 200, type: [CategoryEntity] })
   @UseGuards(AtGuard)
   @Get()
   getAllCategories(@GetCurrentUser('userId') userId: string) {
     return this.categoryService.getAllCategories(userId);
+  }
+
+  @ApiOperation({
+    summary: 'Get all user categories with expends by selected date',
+  })
+  @ApiResponse({ status: 200, type: [CategoryEntity] })
+  @ApiQuery({
+    name: 'start',
+    example: '05-12-2022',
+    required: true,
+    type: String,
+  })
+  @ApiQuery({
+    name: 'end',
+    example: '05-01-2023',
+    required: true,
+    type: String,
+  })
+  @UseGuards(AtGuard)
+  @Get('time-range')
+  getAllCategoriesByDate(
+    @GetCurrentUser('userId') userId: string,
+    @Query('start') start: string,
+    @Query('end') end: string,
+  ) {
+    return this.categoryService.getAllCategoriesByDate(userId, start, end);
   }
 
   @ApiOperation({ summary: 'Create new category' })
@@ -55,7 +82,7 @@ export class CategoryController {
     return this.categoryService.updateCategory(categoryId, userId, dto);
   }
 
-  @ApiOperation({ summary: 'Delete category' })
+  @ApiOperation({ summary: 'Delete category with it`s all transactions' })
   @ApiResponse({ status: 204 })
   @UseGuards(AtGuard)
   @HttpCode(HttpStatus.NO_CONTENT)

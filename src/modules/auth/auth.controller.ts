@@ -43,8 +43,21 @@ export class AuthController {
   @UseGuards(AtGuard)
   @Get('logout')
   @HttpCode(HttpStatus.OK)
-  logout(@GetCurrentUser('sub') userId: string) {
-    return this.authService.logout(userId);
+  logout(
+    @GetCurrentUser('userId') userId: string,
+    @GetCurrentUser('refreshToken') refreshToken: string,
+  ) {
+    return this.authService.logout(userId, refreshToken);
+  }
+
+  @ApiOperation({ summary: 'Logout from all devices' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 200 })
+  @UseGuards(AtGuard)
+  @Get('logout-all')
+  @HttpCode(HttpStatus.OK)
+  logoutFromAllDevices(@GetCurrentUser('userId') userId: string) {
+    return this.authService.logoutFromAllDevices(userId);
   }
 
   @ApiOperation({ summary: 'Get new pair access and refresh tokens' })

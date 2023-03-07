@@ -1,4 +1,4 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication, Logger, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 
 import { AppModule } from '../src/app.module';
@@ -19,6 +19,7 @@ describe('App 2e2', () => {
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     await app.init();
 
+    app.useLogger(new Logger());
     await app.listen(3333);
     prisma = app.get(PrismaService);
     await prisma.cleanDb();
@@ -63,6 +64,7 @@ describe('App 2e2', () => {
     });
   });
 
+  //categories
   describe('Category', () => {
     describe('Get empty', () => {
       it('should get categories', () => {
@@ -99,9 +101,52 @@ describe('App 2e2', () => {
           .withBody(dto2)
           .stores('categoryId2', 'id');
       });
+      it('should create third category', () => {
+        return pactum
+          .spec()
+          .post('/category')
+          .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+          .expectStatus(201)
+          .withBody({ ...dto2, name: 'for delete' })
+          .stores('categoryId3', 'id');
+      });
     });
     describe('Get users categories', () => {
       it('should get 2 categories', () => {
+        return pactum
+          .spec()
+          .get('/category')
+          .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+          .expectStatus(200)
+          .expectJsonLength(3);
+      });
+    });
+
+    describe('update category', () => {
+      it('should update category by id', () => {
+        return pactum
+          .spec()
+          .patch('/category/{categoryId}')
+
+          .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+          .expectStatus(200)
+          .withBody({ name: 'Bikes' });
+      });
+    });
+
+    describe('delete category', () => {
+      it('should delete category by id', () => {
+        return pactum
+          .spec()
+          .withPathParams('categoryId', '$S{categoryId}')
+          .delete('/category/{categoryId}')
+          .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+          .expectStatus(204)
+          .withPathParams('categoryId', '$S{categoryId3}');
+      });
+    });
+    describe('Get users categories', () => {
+      it('should get 2 categories after deleting one', () => {
         return pactum
           .spec()
           .get('/category')
@@ -128,8 +173,7 @@ describe('App 2e2', () => {
           .withPathParams('categoryId', '$S{categoryId}')
           .withHeaders({ Authorization: 'Bearer $S{userAt}' })
           .expectStatus(201)
-          .withBody(dto)
-          .inspect();
+          .withBody(dto);
       });
 
       it('should create second transaction', () => {
@@ -151,6 +195,20 @@ describe('App 2e2', () => {
           .withHeaders({ Authorization: 'Bearer $S{userAt}' })
           .expectStatus(200)
           .expectJsonLength(2);
+      });
+    });
+
+    describe('Get categories with transactions in time range', () => {
+      it('should get transaction', () => {
+        return pactum
+          .spec()
+          .get('/category/time-range')
+          .withQueryParams('start', '2023-03-07')
+          .withQueryParams('end', '2023-03-07')
+          .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+          .expectStatus(200)
+          .expectJsonLength(2)
+          .inspect();
       });
     });
   });
