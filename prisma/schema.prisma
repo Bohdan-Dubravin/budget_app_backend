@@ -10,55 +10,50 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 // User schema
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  displayedName String?
-  avatarUrl String?
-  createdAt DateTime @default(now())
+  id               String         @id @default(uuid())
+  email            String         @unique
+  password         String
+  displayedName    String?
+  avatarUrl        String?
+  createdAt        DateTime       @default(now())
   TotalMonthBudget Float?
-  currencyFormat String?
-  transactions Transaction[]
-  categoryes Category[]
-  refreshTokens RefreshToken[]
-} 
+  currencyFormat   String?
+  transactions     Transaction[]
+  categoryes       Category[]
+  refreshTokens    RefreshToken[]
+}
 
 model RefreshToken {
-  id        String   @id @default(uuid())
+  id           String   @id @default(uuid())
   refreshToken String
-  createdAt   DateTime  @default(now())
-  user    User @relation(fields: [userId], references: [id])
-  userId  String
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
 }
 
 // Category schema
 model Category {
-  id        String   @id @default(uuid())
-  name        String
-  categoryImg String?
+  id            String        @id @default(uuid())
+  name          String
+  categoryImg   String?
   categoryColor String?
-  transactions Transaction[]
-  type String? @default("expends")
-  user    User @relation(fields: [userId], references: [id])
-  userId  String
+  transactions  Transaction[]
+  type          String?       @default("expends")
+  user          User          @relation(fields: [userId], references: [id])
+  userId        String
 }
 
 // Transaction schema
 model Transaction {
-  id        String   @id @default(uuid())
+  id          String   @id @default(uuid())
   amount      Float
   description String?
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime @default(now())
   category    Category @relation(fields: [categoryId], references: [id])
   categoryId  String
 
-  user    User @relation(fields: [userId], references: [id])
-  userId  String
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
 }
-
-
-
-

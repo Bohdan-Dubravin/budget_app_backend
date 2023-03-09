@@ -21,7 +21,8 @@ export class AuthService {
     const tokens = await this.signTokens(user.id, user.email);
 
     await this.updateTokenInDb(user.id, tokens.refreshToken);
-    return tokens;
+    delete user.password;
+    return { ...tokens, ...user };
   }
 
   async login(dto: LoginDto): Promise<Tokens> {
@@ -42,8 +43,8 @@ export class AuthService {
     const tokens = await this.signTokens(existUser.id, existUser.email);
 
     await this.updateTokenInDb(existUser.id, tokens.refreshToken);
-
-    return tokens;
+    delete existUser.password;
+    return { ...tokens, ...existUser };
   }
 
   async logout(userId: string, refreshToken: string) {
