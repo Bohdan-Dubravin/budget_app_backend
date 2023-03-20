@@ -72,4 +72,17 @@ export class AuthController {
   ) {
     return this.authService.refreshTokens(userId, refreshToken);
   }
+
+  @ApiOperation({ summary: 'get userInfo' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 200 })
+  @UseGuards(AtGuard)
+  @Get('getme')
+  @HttpCode(HttpStatus.OK)
+  getMe(
+    @GetCurrentUser('refreshToken') refreshToken: string,
+    @GetCurrentUser('sub') userId: string,
+  ) {
+    return this.authService.getMe(userId);
+  }
 }

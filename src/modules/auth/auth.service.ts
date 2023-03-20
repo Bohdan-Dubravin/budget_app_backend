@@ -119,4 +119,16 @@ export class AuthService {
       where: { OR: [{ createdAt: { lt: thirtyDaysAgo }, refreshToken }] },
     });
   }
+
+  async getMe(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new ForbiddenException('User does not exist');
+    }
+    delete user.password;
+    return user;
+  }
 }

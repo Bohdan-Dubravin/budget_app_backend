@@ -33,7 +33,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: test_budget_prisma
     ports:
-      - 6508:5432
+      - 6505:5432
     env_file:
       - ./.env
     volumes:

@@ -5,6 +5,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
 import { CategoryModule } from './modules/category/category.module';
 import { BudgetsModule } from './budgets/budgets.module';
+import { DbModule } from './db/db.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { BudgetsModule } from './budgets/budgets.module';
     TransactionModule,
     CategoryModule,
     BudgetsModule,
+    DbModule,
   ],
   controllers: [],
   providers: [],
